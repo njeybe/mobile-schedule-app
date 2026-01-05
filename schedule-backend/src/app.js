@@ -7,7 +7,7 @@ import {connectDB} from './config/db.js'
 
 connectDB();
 
-export const app = express();
+const app = express();
 
 app.use((req, res, next) => {
   console.log(`📡 New Request: ${req.method} ${req.url}`);
@@ -23,3 +23,5 @@ app.use('/api/schedule', scheduleRoutes);
 app.get('/', (req, res)=> {
     res.send('Testing')
 });
+
+export default app;
