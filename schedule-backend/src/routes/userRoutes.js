@@ -24,26 +24,41 @@ router.post('/register', async (req, res)=> {
 });
 
 router.post('/login', async (req, res) => {
-    try{
-        const user = await User.findOne({username: req.body.username});
-        if(!user){
-            return res.status(404).json({message: 'User not found'});
+    try {
+        console.log("Login Attempt:", req.body); // 1. See what data arrives
+
+        // Check if env variables are loaded
+        if (!process.env.JWT_SECRET) {
+            console.log("ERROR: JWT_SECRET is missing!");
+            return res.status(500).json("Server Config Error: Missing Secret");
         }
+
+        const user = await User.findOne({ username: req.body.username });
+        
+        if (!user) {
+            console.log("User not found in DB");
+            return res.status(404).json("User not found");
+        }
+
+        console.log("User Found:", user.username); // 2. Confirm user exists
 
         const validPassword = await bcrypt.compare(req.body.password, user.password);
-        if(!validPassword){
-            return res.status(404).json({message: 'Incorrect password, please try again.'})
+        if (!validPassword) {
+            console.log("Password Incorrect");
+            return res.status(400).json("Wrong password");
         }
 
-        const token = jwt.sign({ id: user_id}, process.env.JWT_SECRET, {expiresIn: '3d'});
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "3d" });
+        console.log("Token Generated Success");
 
-        // removes password from response
-        const {password, ...others} = user._doc;
-        res.status(200).json({...others, token});
-    
-    }catch (err){
-        res.status(500).json(err)
+        const { password, ...others } = user._doc;
+        res.status(200).json({ ...others, token });
+
+    } catch (err) {
+        // ⚠️ THIS PRINTS THE CRASH REASON
+        console.error("FULL ERROR LOG:", err); 
+        res.status(500).json(err.message);
     }
-})
+});
 
 export default router;
