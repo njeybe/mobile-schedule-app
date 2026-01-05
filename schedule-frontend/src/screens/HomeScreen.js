@@ -11,7 +11,7 @@ export default function HomeScreen({ navigation }) {
   const fetchSchedules = async () => {
     setLoading(true);
     try {
-      const res = await axiosInstance.get('/schedules');
+      const res = await axiosInstance.get('/schedule');
       setSchedules(res.data);
     } catch (err) {
       console.log(err);
